@@ -10,3 +10,10 @@ func  Multiplicador(x int, y int)int  {
 	return x * y
 }
 
+//Divisor Apenas divide os 2 argumentos e devolve o resultado e o resto da divisão
+func Divisor(x int, y int) (resultado int, resto int)  {
+	resultado = x/y
+	resto = x%y
+	return
+}
+

@@ -1,6 +1,6 @@
 package operadora
 
-import "github.com/AprendendoGo/CursoGO/pacotes/prefixo"
+import "github.com/AprendendoGo/pacotes/prefixo"
 import "strconv"
 
 //Operadora variavél para guardar a operadora

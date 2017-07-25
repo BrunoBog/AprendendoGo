@@ -2,9 +2,8 @@ package main
 
 import (
 	"fmt"
-	//"github.com/brunobog/CursoGO/pacotes/prefixo"
-	"github.com/AprendendoGo/CursoGO/pacotes/operadora"
-	"github.com/AprendendoGo/CursoGO/pacotes/prefixo"
+	"github.com/AprendendoGo/pacotes/operadora"
+	"github.com/AprendendoGo/pacotes/prefixo"
 )
 
 //NomeDoUsuario Nome do usuario do sistema

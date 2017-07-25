@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebResourcesPaths">
+    <contentEntries>
+      <entry url="file://$PROJECT_DIR$">
+        <entryData>
+          <resourceRoots>
+            <path value="file://$PROJECT_DIR$/CursoGO/Functions/matematica" />
+            <path value="file://$PROJECT_DIR$/CursoGO/pacotes" />
+            <path value="file://$PROJECT_DIR$/CursoGO/Variaveis" />
+            <path value="file://$PROJECT_DIR$/CursoGO/Functions" />
+            <path value="file://$PROJECT_DIR$/Functions" />
+            <path value="file://$PROJECT_DIR$/pacotes" />
+            <path value="file://$PROJECT_DIR$/Variaveis" />
+          </resourceRoots>
+        </entryData>
+      </entry>
+    </contentEntries>
+  </component>
+</project>
