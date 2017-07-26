@@ -19,6 +19,8 @@ func main() {
 
 	if !situacao {
 		println("Este credor está adimplente")
+	} else {
+		println("Este credor está inadimplente")
 	}
 
 	if desc, status := tempoDevedor(messes); status { // desta forma as variaveis não valem fora do escopo das {}

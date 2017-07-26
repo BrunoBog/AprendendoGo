@@ -47,4 +47,5 @@ func main() {
 	case numero > 1, numero < 100:
 		fmt.Println("O numero é maior que 1 e menor que 100")
 	}
+	
 }
