@@ -39,8 +39,11 @@ func main() {
 	}
 
 	// para remover item...
-	imovel, achou = cache["Casa Grande"]
+	_, achou = cache["Casa Grande"] // se usa o _ para ignorar o retorno
 	if achou {
-
+		delete(cache, imovel.Nome)
+		//delete(cache,"Casa Grande")
 	}
+	println("Ainda restam ", len(cache), " Itens no cache")
+
 }
