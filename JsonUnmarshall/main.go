@@ -17,7 +17,7 @@ func main() {
 	//url fixa do site
 	modificador := "/posts/1"
 	// estruturando o request com autenticação
-	request, err := http.NewRequest("GET", "https://jsonplaceholder.typicode.com"+modificador, nil)
+ 	request, err := http.NewRequest("GET", "https://jsonplaceholder.typicode.com"+modificador, nil)
 	if err != nil {
 		println("[main], deu erro ao tentar fazer o request na pagina do servidor" + err.Error())
 	}
