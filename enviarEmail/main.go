@@ -11,7 +11,7 @@ func main() {
 
 func send(body string) {
 	from := "procuromuamba@gmail.com"
-	pass := "Sua Senha"
+	pass := "sua senha"
 	to := "teste@gmail.com"
 
 	msg := "From: " + from + "\n" +
@@ -27,6 +27,4 @@ func send(body string) {
 		log.Printf("smtp error: %s", err)
 		return
 	}
-
-	log.Print("sent, visit http://foobarbazz.mailinator.com")
 }
