@@ -12,6 +12,7 @@ func meuscrap() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	title := ""
 	// digite a tag e .nome da class
 	doc.Find("ul .price").Each(func(i int, s *goquery.Selection) {
