@@ -2,7 +2,7 @@
 <hr></hr>
 <h3>Implementações simples para exercitar o aprendizado</h3>
 
-<h4>Para Gerar o build:<h4>  
+<h4>Para Gerar o build:</h4>  
 go build -o ("nome do app")   
 <h4>Para gerar cross plataform: <h4>
 <h5>Windows</h5>
