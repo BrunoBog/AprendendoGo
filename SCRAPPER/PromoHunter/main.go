@@ -38,9 +38,9 @@ func PromoBitScrap() (Promocoes model.PromobitPromo) {
 
 func filtrarDesejoPromobit(desejo string, desejos model.PromobitPromo, caminho string) (err error) {
 	for _, v := range desejos.Oferta {
-		if strings.EqualFold(v.Nome, caminho) {
+		if strings.Contains(strings.ToUpper(v.Nome), strings.ToUpper(desejo)) {
 			json, _ := json.Marshal(v)
-			doRequest(json, caminho)
+			go doRequest(json, caminho)
 		}
 	}
 	return
@@ -53,31 +53,29 @@ func HardMobScrap() (Promocoes model.HardMobPromo) {
 		log.Fatal(err)
 	}
 
-	// digite a tag e .nome da class
 	doc.Find("div .inner").Each(func(i int, s *goquery.Selection) {
 		// For each item...
 		item := model.HardMopbItem{}
 		item.Nome = strings.Replace((strings.Replace(s.Find("a").Text(), "\n", "", -1)), "\t", "", -1)
-		//item.Preco = s.Find("div .price").Text()
-
 		link, _ := s.Find("a").Attr("href")
 		item.Link = strings.Replace(link, " ", "", -1)
-		//		index, _ := fmt.Println(strings.Index(link, "R$"))
 		index := strings.Index(item.Nome, "R$")
 		if index > 0 {
 			item.Preco = item.Nome[index:(len(item.Nome) - 1)]
 		}
-
-		//fmt.Println(item.Nome)
-		//fmt.Println(item.Link)
-		//fmt.Println(item.Preco)
 		Promocoes.Oferta = append(Promocoes.Oferta, item)
 
 	})
 	return
 }
 
-func filtrarDesejoHardMob(desejo model.HardMobPromo) (err error) {
+func filtrarDesejoHardMob(desejo string, desejos model.HardMobPromo, caminho string) (err error) {
+	for _, v := range desejos.Oferta {
+		if strings.Contains(strings.ToUpper(v.Nome), strings.ToUpper(desejo)) {
+			json, _ := json.Marshal(v)
+			go doRequest(json, caminho)
+		}
+	}
 	return
 }
 
@@ -89,7 +87,8 @@ func doRequest(json []byte, caminho string) {
 	// estruturando o request com autenticação
 	request, err := http.NewRequest("POST", caminho, bytes.NewBuffer(json))
 	if err != nil {
-		println("[doRequest], erro ao tentar fazer o request para o requestbin")
+		return
+		//println("[doRequest], erro ao tentar fazer o request para o requestbin")
 	}
 	//usuario e senha aqui
 	request.SetBasicAuth("fizz", "buzz")
@@ -97,33 +96,23 @@ func doRequest(json []byte, caminho string) {
 	request.Header.Set("content-type", "application/json; charset=utf-8")
 	resposta, err := cliente.Do(request)
 	if err != nil {
-		println("[doRequest], deu erro ao tentar executar o request")
+		return
+		//println("[doRequest], deu erro ao tentar executar o request")
 	}
 	if resposta.StatusCode == 200 {
-		println(resposta.Status)
+		//println(resposta.Status)
 
 		corpo, err := ioutil.ReadAll(resposta.Body)
 		if err != nil {
-			println("[doRequest] Erro ao ler o corpo da resposta")
+			//println("[doRequest] Erro ao ler o corpo da resposta")
 			return
 		}
-		fmt.Println(string(corpo))
+		//fmt.Println(string(corpo))
 	}
 	defer resposta.Body.Close()
 }
 
 func main() {
-	/*
-		PromoBitScrap()
-		p := PromoBitScrap()
-
-		for k, v := range p.Oferta {
-			fmt.Println(k, v)
-		}
-		json, _ := json.Marshal(p)
-		doRequest(json)
-	*/
-	p := HardMobScrap()
-	json, _ := json.Marshal(p)
-	doRequest(json, "http://requestbin.fullcontact.com/zp13d1zp")
+	p := PromoBitScrap()
+	filtrarDesejoPromobit("Jogo", p, "http://requestbin.fullcontact.com/zp13d1zp")
 }
