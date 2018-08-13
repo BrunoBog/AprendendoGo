@@ -3,7 +3,7 @@ package main
 import (
 	"./model"
 	"bytes"
-	//	"encoding/json"
+	"encoding/json"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"io/ioutil"
@@ -36,6 +36,16 @@ func PromoBitScrap() (Promocoes model.PromobitPromo) {
 	return
 }
 
+func filtrarDesejoPromobit(desejo string, desejos model.PromobitPromo, caminho string) (err error) {
+	for _, v := range desejos.Oferta {
+		if strings.EqualFold(v.Nome, caminho) {
+			json, _ := json.Marshal(v)
+			doRequest(json, caminho)
+		}
+	}
+	return
+}
+
 func HardMobScrap() (Promocoes model.HardMobPromo) {
 
 	doc, err := goquery.NewDocument("http://www.hardmob.com.br/promocoes/")
@@ -51,25 +61,33 @@ func HardMobScrap() (Promocoes model.HardMobPromo) {
 		//item.Preco = s.Find("div .price").Text()
 
 		link, _ := s.Find("a").Attr("href")
-		item.Link = "www.promobit.com.br" + strings.Replace(link, " ", "", -1)
+		item.Link = strings.Replace(link, " ", "", -1)
 		//		index, _ := fmt.Println(strings.Index(link, "R$"))
-		index, _ := fmt.Println(strings.Index(link, "^([1-9]{1}[\d]{0,2}(\.[\d]{3})*(\,[\d]{0,2})?|[1-9]{1}[\d]{0,}(\,[\d]{0,2})?|0(\,[\d]{0,2})?|(\,[\d]{1,2})?)$"))
-		Preco := link[index]
-		fmt.Println(link)
-		fmt.Println(Preco)
+		index := strings.Index(item.Nome, "R$")
+		if index > 0 {
+			item.Preco = item.Nome[index:(len(item.Nome) - 1)]
+		}
+
+		//fmt.Println(item.Nome)
+		//fmt.Println(item.Link)
+		//fmt.Println(item.Preco)
 		Promocoes.Oferta = append(Promocoes.Oferta, item)
 
 	})
 	return
 }
 
-func doRequest(json []byte) {
+func filtrarDesejoHardMob(desejo model.HardMobPromo) (err error) {
+	return
+}
+
+func doRequest(json []byte, caminho string) {
 
 	cliente := &http.Client{
 		Timeout: time.Second * 30,
 	}
 	// estruturando o request com autenticação
-	request, err := http.NewRequest("POST", "http://requestbin.fullcontact.com/wuuz65wu", bytes.NewBuffer(json))
+	request, err := http.NewRequest("POST", caminho, bytes.NewBuffer(json))
 	if err != nil {
 		println("[doRequest], erro ao tentar fazer o request para o requestbin")
 	}
@@ -105,5 +123,7 @@ func main() {
 		json, _ := json.Marshal(p)
 		doRequest(json)
 	*/
-	HardMobScrap()
+	p := HardMobScrap()
+	json, _ := json.Marshal(p)
+	doRequest(json, "http://requestbin.fullcontact.com/zp13d1zp")
 }
