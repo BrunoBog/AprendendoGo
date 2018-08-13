@@ -36,12 +36,16 @@ func PromoBitScrap() (Promocoes model.PromobitPromo) {
 	return
 }
 
-func filtrarDesejoPromobit(desejo string, desejos model.PromobitPromo, caminho string) (err error) {
-	for _, v := range desejos.Oferta {
-		if strings.Contains(strings.ToUpper(v.Nome), strings.ToUpper(desejo)) {
-			json, _ := json.Marshal(v)
-			go doRequest(json, caminho)
-		}
+func compareAndSendPromobit(desejo string, item model.PromobitItem, caminho string) {
+	if strings.Contains(strings.ToUpper(item.Nome), strings.ToUpper(desejo)) {
+		json, _ := json.Marshal(item)
+		go doRequest(json, caminho)
+	}
+}
+
+func filtrarDesejoPromobit(desejo string, caminho string) (err error) {
+	for _, item := range PromoBitScrap().Oferta {
+		go compareAndSendPromobit(desejo, item, caminho)
 	}
 	return
 }
@@ -69,12 +73,18 @@ func HardMobScrap() (Promocoes model.HardMobPromo) {
 	return
 }
 
-func filtrarDesejoHardMob(desejo string, desejos model.HardMobPromo, caminho string) (err error) {
-	for _, v := range desejos.Oferta {
-		if strings.Contains(strings.ToUpper(v.Nome), strings.ToUpper(desejo)) {
-			json, _ := json.Marshal(v)
-			go doRequest(json, caminho)
-		}
+func compareAndSendHardMob(desejo string, item model.HardMopbItem, caminho string) {
+	fmt.Println(strings.ToUpper(desejo), strings.ToUpper(item.Nome))
+	if strings.Contains(strings.ToUpper(item.Nome), strings.ToUpper(desejo)) {
+		fmt.Println("entrei no if  \n\n\n ")
+		json, _ := json.Marshal(item)
+		go doRequest(json, caminho)
+	}
+}
+
+func filtrarDesejoHardMob(desejo string, caminho string) (err error) {
+	for _, item := range HardMobScrap().Oferta {
+		go compareAndSendHardMob(desejo, item, caminho)
 	}
 	return
 }
@@ -107,12 +117,13 @@ func doRequest(json []byte, caminho string) {
 			//println("[doRequest] Erro ao ler o corpo da resposta")
 			return
 		}
-		//fmt.Println(string(corpo))
+		fmt.Println(string(corpo))
 	}
 	defer resposta.Body.Close()
 }
 
 func main() {
-	p := PromoBitScrap()
-	filtrarDesejoPromobit("Jogo", p, "http://requestbin.fullcontact.com/zp13d1zp")
+	go filtrarDesejoHardMob("STEAM", "http://requestbin.fullcontact.com/zp13d1zp")  // item - destino
+	go filtrarDesejoPromobit("STEAM", "http://requestbin.fullcontact.com/zp13d1zp") // item - destino
+	time.Sleep(time.Second * 60 * 5)
 }
