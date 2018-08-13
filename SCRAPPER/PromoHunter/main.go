@@ -3,7 +3,7 @@ package main
 import (
 	"./model"
 	"bytes"
-	//"encoding/json"
+	//	"encoding/json"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"io/ioutil"
@@ -36,7 +36,7 @@ func PromoBitScrap() (Promocoes model.PromobitPromo) {
 	return
 }
 
-func HardMobScrap() (promocoes model.HardMobPromo) {
+func HardMobScrap() (Promocoes model.HardMobPromo) {
 
 	doc, err := goquery.NewDocument("http://www.hardmob.com.br/promocoes/")
 	if err != nil {
@@ -44,15 +44,19 @@ func HardMobScrap() (promocoes model.HardMobPromo) {
 	}
 
 	// digite a tag e .nome da class
-	doc.Find("div .pr-tl-card").Each(func(i int, s *goquery.Selection) {
+	doc.Find("div .inner").Each(func(i int, s *goquery.Selection) {
 		// For each item...
 		item := model.HardMopbItem{}
 		item.Nome = strings.Replace((strings.Replace(s.Find("a").Text(), "\n", "", -1)), "\t", "", -1)
-		item.Preco = s.Find("div .price").Text()
+		//item.Preco = s.Find("div .price").Text()
 
 		link, _ := s.Find("a").Attr("href")
 		item.Link = "www.promobit.com.br" + strings.Replace(link, " ", "", -1)
-
+		//		index, _ := fmt.Println(strings.Index(link, "R$"))
+		index, _ := fmt.Println(strings.Index(link, "^([1-9]{1}[\d]{0,2}(\.[\d]{3})*(\,[\d]{0,2})?|[1-9]{1}[\d]{0,}(\,[\d]{0,2})?|0(\,[\d]{0,2})?|(\,[\d]{1,2})?)$"))
+		Preco := link[index]
+		fmt.Println(link)
+		fmt.Println(Preco)
 		Promocoes.Oferta = append(Promocoes.Oferta, item)
 
 	})
@@ -91,13 +95,15 @@ func doRequest(json []byte) {
 }
 
 func main() {
-	PromoBitScrap()
-	//p := PromoBitScrap()
+	/*
+		PromoBitScrap()
+		p := PromoBitScrap()
 
-	//for k, v := range p.Oferta {
-	//fmt.Println(k, v)
-	//}
-	//json, _ := json.Marshal(p)
-	//go doRequest(json)
-
+		for k, v := range p.Oferta {
+			fmt.Println(k, v)
+		}
+		json, _ := json.Marshal(p)
+		doRequest(json)
+	*/
+	HardMobScrap()
 }
