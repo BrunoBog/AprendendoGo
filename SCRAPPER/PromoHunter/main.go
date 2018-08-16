@@ -1,6 +1,7 @@
 package main
 
 import (
+	"./database"
 	"./model"
 	"bytes"
 	"encoding/json"
@@ -10,7 +11,12 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
+)
+
+var (
+	orquestrador sync.WaitGroup
 )
 
 func PromoBitScrap() (Promocoes model.PromobitPromo) {
@@ -38,15 +44,20 @@ func PromoBitScrap() (Promocoes model.PromobitPromo) {
 
 func compareAndSendPromobit(desejo string, item model.PromobitItem, caminho string) {
 	if strings.Contains(strings.ToUpper(item.Nome), strings.ToUpper(desejo)) {
+		fmt.Println(item.Nome, item.Link)
 		json, _ := json.Marshal(item)
+		orquestrador.Add(1)
 		go doRequest(json, caminho)
 	}
+	orquestrador.Done()
 }
 
 func filtrarDesejoPromobit(desejo string, caminho string) (err error) {
 	for _, item := range PromoBitScrap().Oferta {
+		orquestrador.Add(1)
 		go compareAndSendPromobit(desejo, item, caminho)
 	}
+	orquestrador.Done()
 	return
 }
 
@@ -74,18 +85,22 @@ func HardMobScrap() (Promocoes model.HardMobPromo) {
 }
 
 func compareAndSendHardMob(desejo string, item model.HardMopbItem, caminho string) {
-	fmt.Println(strings.ToUpper(desejo), strings.ToUpper(item.Nome))
 	if strings.Contains(strings.ToUpper(item.Nome), strings.ToUpper(desejo)) {
-		fmt.Println("entrei no if  \n\n\n ")
+		fmt.Println(item.Nome, item.Link)
 		json, _ := json.Marshal(item)
+		orquestrador.Add(1)
 		go doRequest(json, caminho)
 	}
+	orquestrador.Done()
 }
 
 func filtrarDesejoHardMob(desejo string, caminho string) (err error) {
 	for _, item := range HardMobScrap().Oferta {
+		fmt.Println(item.Nome, item.Link)
+		orquestrador.Add(1)
 		go compareAndSendHardMob(desejo, item, caminho)
 	}
+	orquestrador.Done()
 	return
 }
 
@@ -105,7 +120,9 @@ func doRequest(json []byte, caminho string) {
 	// para enviar um content type temos que add ele noo request
 	request.Header.Set("content-type", "application/json; charset=utf-8")
 	resposta, err := cliente.Do(request)
+	defer resposta.Body.Close()
 	if err != nil {
+		orquestrador.Done()
 		return
 		//println("[doRequest], deu erro ao tentar executar o request")
 	}
@@ -114,16 +131,46 @@ func doRequest(json []byte, caminho string) {
 
 		corpo, err := ioutil.ReadAll(resposta.Body)
 		if err != nil {
+			orquestrador.Done()
 			//println("[doRequest] Erro ao ler o corpo da resposta")
 			return
 		}
 		fmt.Println(string(corpo))
 	}
-	defer resposta.Body.Close()
+
+	orquestrador.Done()
+}
+
+//addDesejo  -pendente
+func addDesejo(json []byte) {
+
+	//desejo := model.Desejos{}
+	//json.Unmarshal(json, &desejo)
+
+	//desejo.AddDesejos()
+
+	return
+}
+
+func conectarNoBD() {
+	//err := repos.teste()
+	err := repos.AbreSessaoComMongo()
+	if err != nil {
+		fmt.Println("Parando a carga do servidor. Erro ao abrir a sessao com o MongoDB: ", err.Error())
+	}
+
+	err = repos.ConectaNoMongo()
+	if err != nil {
+		fmt.Println("Parando a carga do servidor. Erro ao abrir a sessao com o MongoDB: ", err.Error())
+		return
+	}
 }
 
 func main() {
-	go filtrarDesejoHardMob("STEAM", "http://requestbin.fullcontact.com/zp13d1zp")  // item - destino
-	go filtrarDesejoPromobit("STEAM", "http://requestbin.fullcontact.com/zp13d1zp") // item - destino
-	time.Sleep(time.Second * 60 * 5)
+
+	orquestrador.Add(1)
+	go filtrarDesejoHardMob("Luva", "http://requestbin.fullcontact.com/zp13d1zp")  // item - destino
+	go filtrarDesejoPromobit("Luva", "http://requestbin.fullcontact.com/zp13d1zp") // item - destino
+	orquestrador.Wait()
+
 }

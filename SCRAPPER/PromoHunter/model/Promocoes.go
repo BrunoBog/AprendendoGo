@@ -1,6 +1,6 @@
 package model
 
 type Promocoes struct {
-	Promobit PromobitPromo `json:"Promobit"`
-	HardMob  HardMobPromo  `json:"HardMob"`
+	Promobit PromobitPromo `json:"Promobit"  bson:"PromobitPromo"`
+	HardMob  HardMobPromo  `json:"HardMob"  bson:"HardMobPromo"`
 }
