@@ -1,7 +1,6 @@
 package main
 
 import (
-	"./database"
 	"./model"
 	"bytes"
 	"encoding/json"
@@ -18,48 +17,6 @@ import (
 var (
 	orquestrador sync.WaitGroup
 )
-
-func PromoBitScrap() (Promocoes model.PromobitPromo) {
-
-	doc, err := goquery.NewDocument("https://www.promobit.com.br/")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// digite a tag e .nome da class
-	doc.Find("div .pr-tl-card").Each(func(i int, s *goquery.Selection) {
-		// For each item...
-		item := model.PromobitItem{}
-		item.Nome = strings.Replace((strings.Replace(s.Find("a").Text(), "\n", "", -1)), "\t", "", -1)
-		item.Preco = s.Find("div .price").Text()
-		item.Loja = s.Find("div .where").Text()
-		link, _ := s.Find("a").Attr("href")
-		item.Link = "www.promobit.com.br" + strings.Replace(link, " ", "", -1)
-
-		Promocoes.Oferta = append(Promocoes.Oferta, item)
-
-	})
-	return
-}
-
-func compareAndSendPromobit(desejo string, item model.PromobitItem, caminho string) {
-	if strings.Contains(strings.ToUpper(item.Nome), strings.ToUpper(desejo)) {
-		fmt.Println(item.Nome, item.Link)
-		json, _ := json.Marshal(item)
-		orquestrador.Add(1)
-		go doRequest(json, caminho)
-	}
-	orquestrador.Done()
-}
-
-func filtrarDesejoPromobit(desejo string, caminho string) (err error) {
-	for _, item := range PromoBitScrap().Oferta {
-		orquestrador.Add(1)
-		go compareAndSendPromobit(desejo, item, caminho)
-	}
-	orquestrador.Done()
-	return
-}
 
 func HardMobScrap() (Promocoes model.HardMobPromo) {
 
@@ -99,6 +56,48 @@ func filtrarDesejoHardMob(desejo string, caminho string) (err error) {
 		fmt.Println(item.Nome, item.Link)
 		orquestrador.Add(1)
 		go compareAndSendHardMob(desejo, item, caminho)
+	}
+	orquestrador.Done()
+	return
+}
+
+func PromoBitScrap() (Promocoes model.PromobitPromo) {
+
+	doc, err := goquery.NewDocument("https://www.promobit.com.br/")
+	if err != nil {
+		log.Fatal(err)
+	}
+	// digite a tag e .nome da class
+	doc.Find("div .pr-tl-card").Each(func(i int, s *goquery.Selection) {
+		// For each item...
+		item := model.PromobitItem{}
+		item.Nome = strings.Replace((strings.Replace(s.Find("a").Text(), "\n", "", -1)), "\t", "", -1)
+		item.Preco = s.Find("div .price").Text()
+		item.Loja = s.Find("div .where").Text()
+		link, _ := s.Find("a").Attr("href")
+		item.Link = "www.promobit.com.br" + strings.Replace(link, " ", "", -1)
+
+		Promocoes.Oferta = append(Promocoes.Oferta, item)
+
+	})
+	return
+}
+
+func compareAndSendPromobit(desejo string, item model.PromobitItem, caminho string) {
+	log.Println(item.Nome, item.Link)
+	if strings.Contains(strings.ToUpper(item.Nome), strings.ToUpper(desejo)) {
+		fmt.Println(item.Nome, item.Link)
+		json, _ := json.Marshal(item)
+		orquestrador.Add(1)
+		go doRequest(json, caminho)
+	}
+	orquestrador.Done()
+}
+
+func filtrarDesejoPromobit(desejo string, caminho string) (err error) {
+	for _, item := range PromoBitScrap().Oferta {
+		orquestrador.Add(1)
+		go compareAndSendPromobit(desejo, item, caminho)
 	}
 	orquestrador.Done()
 	return
@@ -152,25 +151,11 @@ func addDesejo(json []byte) {
 	return
 }
 
-func conectarNoBD() {
-	//err := repos.teste()
-	err := repos.AbreSessaoComMongo()
-	if err != nil {
-		fmt.Println("Parando a carga do servidor. Erro ao abrir a sessao com o MongoDB: ", err.Error())
-	}
-
-	err = repos.ConectaNoMongo()
-	if err != nil {
-		fmt.Println("Parando a carga do servidor. Erro ao abrir a sessao com o MongoDB: ", err.Error())
-		return
-	}
-}
-
 func main() {
 
 	orquestrador.Add(1)
-	go filtrarDesejoHardMob("Luva", "http://requestbin.fullcontact.com/zp13d1zp")  // item - destino
-	go filtrarDesejoPromobit("Luva", "http://requestbin.fullcontact.com/zp13d1zp") // item - destino
+	go filtrarDesejoHardMob("Luva", "http://requestbin.fullcontact.com/zp13d1zp") // item - destino
+	//go filtrarDesejoPromobit("Luva", "http://requestbin.fullcontact.com/zp13d1zp") // item - destino
 	orquestrador.Wait()
 
 }

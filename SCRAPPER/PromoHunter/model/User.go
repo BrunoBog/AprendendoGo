@@ -1,7 +1,7 @@
 package model
 
-//Desejos representa os desejos de um Usuario
-type Desejos struct {
+//User representa os desejos de um Usuario
+type User struct {
 	Email   string   `json:"Email" bson:"Email"`
 	Desejos []Desejo `json:"Desejos" bson:"Desejos"`
 }
@@ -11,12 +11,12 @@ type Desejo struct {
 	Nome string `json:"Nome" bson:"Nome"`
 }
 
-func (d *Desejos) BuscarDesejos(email string) (err error) {
+func (d *Desejo) BuscarDesejos(email string) (err error) {
 
 	return
 }
 
-func (d *Desejos) AddDesejos(email string) (err error) {
+func (d *Desejo) AddDesejos(email string) (err error) {
 
 	return
 }

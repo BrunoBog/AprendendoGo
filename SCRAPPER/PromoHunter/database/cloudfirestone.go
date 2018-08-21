@@ -5,6 +5,7 @@ package main
 import (
 	"log"
 
+	"../model"
 	firebase "firebase.google.com/go"
 	"golang.org/x/net/context"
 	"google.golang.org/api/iterator"
@@ -26,29 +27,27 @@ func main() {
 	}
 	defer client.Close()
 
-	gravarDados(client)
+	desejo := model.Desejo{}
+	desejo.Nome = "Puff"
+	desejo.Nome = "Carrinho"
+
+	user := model.User{}
+	user.Email = "bog906@gmail.com"
+	user.Desejos[0] = desejo
+
+	gravarDados(client, user)
 	lerDados(client)
 
 }
 
-// I Don´t know how do this.... https://godoc.org/firebase.google.com/go#App
-func gravarDados(client *firestore.Client) {
-	/* Para adicionar dados */
-	_, _, err := client.Collection("users").Add(context.Background(), map[string]interface{}{
-		"first": "Ada",
-		"last":  "Lovelace",
-		"born":  1815,
-	})
+// I Don´t know how this works... https://godoc.org/firebase.google.com/go#App
+func gravarDados(client *firestore.Client, dados map[string]interface{}) {
+
+	_, _, err := client.Collection("users").Add(context.Background(), dados)
 	if err != nil {
 		log.Fatalf("Failed adding alovelace: %v", err)
 	}
 
-	_, _, err = client.Collection("users").Add(context.Background(), map[string]interface{}{
-		"first":  "Alan",
-		"middle": "Mathison",
-		"last":   "Turing",
-		"born":   1912,
-	})
 	if err != nil {
 		log.Fatalf("Failed adding aturing: %v", err)
 	}
@@ -68,4 +67,20 @@ func lerDados(client *firestore.Client) {
 		}
 		log.Println(doc.Data())
 	}
+}
+
+func gravaAntigo(client *firestore.Client, dados map[string]interface{}) {
+	/* Para adicionar dados */
+	_, _, err := client.Collection("users").Add(context.Background(), map[string]interface{}{
+		"first": "Ada",
+		"last":  "Lovelace",
+		"born":  1815,
+	})
+	_, _, err = client.Collection("users").Add(context.Background(), map[string]interface{}{
+		"first":  "Alan",
+		"middle": "Mathison",
+		"last":   "Turing",
+		"born":   1912,
+	})
+
 }
